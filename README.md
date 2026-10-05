@@ -13,7 +13,6 @@ A glassmorphic, dark-mode web application is included with full real-time stream
 python server.py
 # or double-click run_web.bat on Windows
 ```
-Open **[http://127.0.0.1:8000](http://127.0.0.1:8000)** in your web browser.
 
 ### Key Web Features:
 - **⚡ Live Batch Validator**:
