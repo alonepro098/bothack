@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telegram Bot Token Studio | Validator & Generator</title>
+  <meta name="description" content="High-performance Telegram Bot Token Validator, Generator, and Live Analytics Suite.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="dark-theme">
+  <!-- Background Glow & Grid Canvas -->
+  <div class="bg-glow-orb orb-1"></div>
+  <div class="bg-glow-orb orb-2"></div>
+  <div class="bg-glow-orb orb-3"></div>
+  <div class="grid-overlay"></div>
+
+  <div class="app-container">
+    <!-- Top Header Bar -->
+    <header class="top-navbar">
+      <div class="brand-group">
+        <div class="brand-icon-wrapper">
+          <svg class="tg-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+          <span class="pulse-ring"></span>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">TOKEN<span>STUDIO</span></h1>
+          <p class="brand-subtitle">Telegram Bot Token Validator & Mock Generator</p>
+        </div>
+      </div>
+
+      <div class="navbar-actions">
+        <div class="status-badge" id="server-status-badge">
+          <span class="status-dot"></span>
+          <span class="status-text">Engine Online</span>
+        </div>
+
+        <button class="toggle-btn" id="sound-toggle-btn" title="Toggle audio feedback" aria-label="Toggle Sound">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+          <span id="sound-label">Audio ON</span>
+        </button>
+
+        <button class="toggle-btn" id="mask-toggle-btn" title="Toggle token masking in UI" aria-label="Toggle Token Mask">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <span id="mask-label">Mask Tokens</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Stats HUD Ribbon -->
+    <section class="stats-ribbon">
+      <div class="stat-card" id="card-total">
+        <div class="stat-icon-box cyan">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Total Processed</span>
+          <h2 class="stat-number" id="stat-total">0</h2>
+        </div>
+      </div>
+
+      <div class="stat-card" id="card-hits">
+        <div class="stat-icon-box emerald">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <div class="label-with-pill">
+            <span class="stat-label">Valid Hits</span>
+            <span class="hit-rate-pill" id="hit-rate-badge">0%</span>
+          </div>
+          <h2 class="stat-number emerald-glow" id="stat-hits">0</h2>
+        </div>
+      </div>
+
+      <div class="stat-card" id="card-misses">
+        <div class="stat-icon-box rose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Invalid / Skipped</span>
+          <h2 class="stat-number rose-glow" id="stat-misses">0</h2>
+        </div>
+      </div>
+
+      <div class="stat-card" id="card-latency">
+        <div class="stat-icon-box amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Avg Response</span>
+          <h2 class="stat-number" id="stat-latency">-- ms</h2>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" role="tablist">
+      <button class="tab-btn active" data-tab="tab-validator" id="btn-tab-validator" role="tab" aria-selected="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+        <span>Token Validator</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-generator" id="btn-tab-generator" role="tab" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+        <span>Mock Generator</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-vault" id="btn-tab-vault" role="tab" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+        <span>Hit Vault (<span id="vault-count-badge">0</span>)</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-terminal" id="btn-tab-terminal" role="tab" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        <span>Live Stream Logs</span>
+      </button>
+    </nav>
+
+    <!-- TAB 1: VALIDATOR -->
+    <main class="tab-content active" id="tab-validator" role="tabpanel">
+      <div class="grid-layout-validator">
+        <!-- Input Panel -->
+        <section class="glass-panel input-panel">
+          <div class="panel-header">
+            <div class="header-left">
+              <h3>Token Input Matrix</h3>
+              <p class="panel-desc">Paste tokens one per line, or drag & drop files (.txt / .csv)</p>
+            </div>
+            <div class="header-actions">
+              <button class="btn btn-xs btn-outline" id="load-demo-btn" title="Load sample test tokens">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>
+                Load Demo Tokens
+              </button>
+              <button class="btn btn-xs btn-subtle" id="clear-input-btn" title="Clear all input">Clear</button>
+            </div>
+          </div>
+
+          <!-- Dropzone Container -->
+          <div class="dropzone-wrapper" id="dropzone">
+            <textarea id="token-input-area" placeholder="Enter bot tokens here (one per line)...&#10;Example:&#10;111111111:DEMOtokenAAAAAAAAAAAAAAAAAAAAAAAAA&#10;222222222:DEMOtokenBBBBBBBBBBBBBBBBBBBBBBBBB&#10;123456789:ABCDefGhIJkLmnOpQrSTUVwxyz1234567890" spellcheck="false"></textarea>
+            <div class="dropzone-drag-overlay" id="drag-overlay">
+              <div class="drag-message">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                <p>Drop your tokens file here</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="input-footer">
+            <span class="token-count-indicator" id="input-token-count">0 tokens detected</span>
+            <label class="file-upload-label" for="file-upload-input">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Browse File (.txt, .csv)
+              <input type="file" id="file-upload-input" accept=".txt,.csv,.json,.log">
+            </label>
+          </div>
+
+          <!-- Pipeline Controls Settings -->
+          <div class="settings-grid">
+            <div class="setting-item">
+              <label for="concurrency-slider">Concurrency: <strong id="concurrency-val">2</strong></label>
+              <input type="range" id="concurrency-slider" min="1" max="10" value="2" step="1">
+            </div>
+
+            <div class="setting-item">
+              <label for="delay-slider">Rate Delay: <strong id="delay-val">0.2s</strong></label>
+              <input type="range" id="delay-slider" min="0" max="2.0" value="0.2" step="0.1">
+            </div>
+
+            <div class="setting-item toggle-setting">
+              <div class="toggle-text">
+                <label for="demo-mode-checkbox">Demo / Test Mode</label>
+                <span class="hint">Simulates responses with zero network hits</span>
+              </div>
+              <input type="checkbox" id="demo-mode-checkbox" class="switch-input" checked>
+            </div>
+          </div>
+
+          <!-- Telegram Live Alerts Configuration Card -->
+          <div class="telegram-alert-card" id="telegram-alert-section">
+            <div class="alert-card-header">
+              <div class="alert-header-left">
+                <div class="alert-tg-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h4>Live Telegram Hit Alerts</h4>
+                  <p class="alert-card-hint">Send instant notifications to your personal Telegram on every valid HIT</p>
+                </div>
+              </div>
+              <label class="switch-container">
+                <input type="checkbox" id="enable-tg-alert" class="switch-input" checked>
+              </label>
+            </div>
+
+            <div class="alert-inputs-grid" id="tg-alert-inputs-box">
+              <div class="alert-input-group">
+                <label for="tg-alert-bot-token">Alert Sender Bot Token</label>
+                <input type="text" id="tg-alert-bot-token" value="8773109156:AAFe0HMTUcb0b1z_KvwnYXPmkw4Gy0ENj6E" placeholder="Bot Token (e.g. 123456:ABC...)">
+              </div>
+
+              <div class="alert-input-group">
+                <label for="tg-alert-chat-id">Your Telegram Chat ID</label>
+                <div class="chat-id-row">
+                  <input type="text" id="tg-alert-chat-id" value="8720218544" placeholder="Your Chat ID (e.g. 8720218544)">
+                  <button type="button" class="btn btn-xs btn-outline" id="btn-test-tg-alert" title="Send a test message to verify Telegram alert">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    Test Ping
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Proxy Engine & Rotation Card -->
+          <div class="proxy-engine-card" id="proxy-engine-section">
+            <div class="alert-card-header">
+              <div class="alert-header-left">
+                <div class="alert-tg-badge purple">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h4>Proxy Rotation Engine</h4>
+                  <p class="alert-card-hint">Prevent IP rate-limiting by rotating requests across free or custom proxies</p>
+                </div>
+              </div>
+              <label class="switch-container">
+                <input type="checkbox" id="enable-proxies-toggle" class="switch-input">
+              </label>
+            </div>
+
+            <div class="proxy-inputs-box" id="proxy-controls-box">
+              <div class="proxy-actions-toolbar">
+                <button type="button" class="btn btn-xs btn-purple" id="btn-auto-fetch-proxies" title="Download 100+ free live HTTP proxies">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+                  ⚡ Auto-Fetch Free Proxies
+                </button>
+                <button type="button" class="btn btn-xs btn-outline" id="btn-test-proxies-health">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                  Test Latency
+                </button>
+                <span class="proxy-count-chip" id="proxy-count-status">0 proxies loaded</span>
+              </div>
+              <textarea id="proxy-list-area" placeholder="Enter HTTP or SOCKS5 proxies (one per line)...&#10;Example:&#10;http://103.152.112.120:80&#10;socks5://184.178.172.18:4145" rows="3" spellcheck="false"></textarea>
+            </div>
+          </div>
+
+
+
+          <!-- Action Buttons -->
+          <div class="action-buttons-row">
+            <button class="btn btn-primary btn-glow" id="start-validation-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <span>Start Validation Pipeline</span>
+            </button>
+            <button class="btn btn-danger" id="stop-validation-btn" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12"></rect></svg>
+              <span>Stop</span>
+            </button>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="progress-section" id="progress-section" style="display: none;">
+            <div class="progress-info-row">
+              <span id="progress-status-text">Validating 0 of 0...</span>
+              <span id="progress-percent-text">0%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="progress-bar-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Live Hits & Activity Feed -->
+        <section class="glass-panel feed-panel">
+          <div class="panel-header">
+            <div class="header-left">
+              <h3>Live Verification Stream</h3>
+              <p class="panel-desc">Real-time parsed results as they are verified</p>
+            </div>
+            <button class="btn btn-xs btn-subtle" id="clear-feed-btn">Clear Feed</button>
+          </div>
+
+          <div class="live-feed-list" id="live-feed-list">
+            <div class="empty-feed-state" id="empty-feed-placeholder">
+              <div class="pulse-radar">
+                <div class="radar-circle"></div>
+                <div class="radar-scan"></div>
+              </div>
+              <h4>Pipeline Ready</h4>
+              <p>Add tokens on the left and click <strong>Start Validation</strong> to stream live checks.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- TAB 2: GENERATOR -->
+    <main class="tab-content" id="tab-generator" role="tabpanel">
+      <div class="grid-layout-generator">
+        <section class="glass-panel">
+          <div class="panel-header">
+            <div class="header-left">
+              <h3>Synthetic Token Generator</h3>
+              <p class="panel-desc">Generate Telegram-compliant token format strings for development & sandbox load testing</p>
+            </div>
+          </div>
+
+          <div class="generator-controls-grid">
+            <div class="control-box">
+              <label for="gen-count-input">Number of Tokens to Generate</label>
+              <div class="number-input-group">
+                <input type="number" id="gen-count-input" value="25" min="1" max="1000">
+                <div class="preset-pills">
+                  <button class="pill-btn" onclick="document.getElementById('gen-count-input').value = 10">10</button>
+                  <button class="pill-btn" onclick="document.getElementById('gen-count-input').value = 50">50</button>
+                  <button class="pill-btn" onclick="document.getElementById('gen-count-input').value = 100">100</button>
+                  <button class="pill-btn" onclick="document.getElementById('gen-count-input').value = 500">500</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="control-box">
+              <label for="gen-digits-range">Bot ID Digits Range</label>
+              <select id="gen-digits-range" class="form-select">
+                <option value="9,10" selected>9 to 10 Digits (Standard Telegram ID)</option>
+                <option value="8,9">8 to 9 Digits (Legacy Bots)</option>
+                <option value="10,11">10 to 11 Digits (Modern High-ID Range)</option>
+              </select>
+            </div>
+
+            <div class="control-box">
+              <label for="gen-secret-len">Secret Key Length</label>
+              <select id="gen-secret-len" class="form-select">
+                <option value="35">35 Characters (Compact Format)</option>
+                <option value="45" selected>45 Characters (Standard BotFather Format)</option>
+                <option value="50">50 Characters (Extended Format)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="gen-action-row">
+            <button class="btn btn-primary btn-glow" id="btn-run-generate">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+              <span>Generate Tokens</span>
+            </button>
+          </div>
+
+          <!-- Generated Tokens Display -->
+          <div class="generated-results-wrapper" id="generated-wrapper" style="display: none;">
+            <div class="results-header">
+              <span id="gen-count-label">Generated 0 tokens</span>
+              <div class="header-actions">
+                <button class="btn btn-xs btn-outline" id="btn-copy-gen">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  Copy All
+                </button>
+                <button class="btn btn-xs btn-outline" id="btn-download-gen">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  Download .TXT
+                </button>
+                <button class="btn btn-xs btn-emerald" id="btn-send-to-validator">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                  Send to Validator & Test
+                </button>
+              </div>
+            </div>
+            <textarea id="gen-output-area" readonly spellcheck="false"></textarea>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- TAB 3: HIT VAULT -->
+    <main class="tab-content" id="tab-vault" role="tabpanel">
+      <div class="glass-panel">
+        <div class="panel-header vault-header">
+          <div class="header-left">
+            <h3>Verified Hit Vault</h3>
+            <p class="panel-desc">All successful bot authentications collected in this session</p>
+          </div>
+
+          <div class="vault-tools">
+            <div class="search-input-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="vault-search-input" placeholder="Search by name, username, or bot ID...">
+            </div>
+
+            <div class="export-dropdown-group">
+              <button class="btn btn-outline" id="btn-export-json">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Export JSON
+              </button>
+              <button class="btn btn-outline" id="btn-export-csv">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Export CSV
+              </button>
+              <button class="btn btn-subtle" id="btn-clear-vault">Clear Vault</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="table-responsive">
+          <table class="vault-table" id="vault-table">
+            <thead>
+              <tr>
+                <th>Bot Info</th>
+                <th>Bot ID</th>
+                <th>Username</th>
+                <th>Capabilities</th>
+                <th>Latency</th>
+                <th>Token</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="vault-table-body">
+              <tr class="empty-row">
+                <td colspan="7">
+                  <div class="table-empty-notice">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    <span>No verified bot tokens recorded yet. Run validation to populate your vault.</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <!-- TAB 4: LIVE TERMINAL -->
+    <main class="tab-content" id="tab-terminal" role="tabpanel">
+      <div class="glass-panel terminal-panel">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <div class="terminal-title">validator_worker.log — bash</div>
+          <div class="terminal-actions">
+            <label class="autoscroll-toggle">
+              <input type="checkbox" id="terminal-autoscroll" checked>
+              <span>Auto-scroll</span>
+            </label>
+            <button class="btn btn-xs btn-subtle" id="btn-clear-terminal">Clear</button>
+          </div>
+        </div>
+        <div class="terminal-screen" id="terminal-screen">
+          <div class="term-line system">[SYSTEM] Terminal initialized. Waiting for pipeline stream...</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Telegram Bot Token Studio &bull; Safe Operator Token Validator & Sandbox Generator</p>
+      <p class="creator-credit">Made By <a href="https://t.me/moh_maya_official" target="_blank" rel="noopener" class="creator-link">Ayush 💖</a></p>
+    </footer>
+  </div>
+
+  <!-- Telegram Channel Join Popup Modal -->
+  <div class="modal-backdrop" id="tg-join-modal" style="display: flex;">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="btn-close-modal" aria-label="Close modal">&times;</button>
+      <div class="modal-icon-glow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </div>
+      <h3 class="modal-title">Join Our Telegram Channel</h3>
+      <p class="modal-desc">Stay updated with fresh bot tools, updates, proxies, and releases on <span class="highlight-channel">@frozentools</span>!</p>
+      
+      <div class="modal-actions">
+        <a href="https://t.me/frozentools" target="_blank" rel="noopener" class="btn btn-primary btn-glow modal-join-btn" id="btn-modal-join">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+          Join @frozentools 🚀
+        </a>
+        <button class="btn btn-subtle" id="btn-modal-continue">Continue to App</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
+
